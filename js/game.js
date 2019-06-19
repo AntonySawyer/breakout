@@ -71,7 +71,8 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
     }
 
     function initBricks() {
-        brickInfo = levels[`level_${lvl}`];
+        // brickInfo = levels[`level_${lvl}`];
+        brickInfo = getLevel();
         bricks = game.add.group();
         let usedExtra = 0;
         let usedEmpty = 0;
@@ -116,14 +117,13 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
         }
     }
 
-    function killBrick(brick) {
+    function extraBrick(brick) {
         const getExtra = Math.round(Math.random()-0.15);
         if (getExtra) {
             extra = getCircle(brick.x, brick.y, 3, 'orange');
             game.physics.enable(extra, Phaser.Physics.ARCADE);
             extra.body.gravity.y = 80;
         }
-        brick.kill();
         return;
     }
 
@@ -135,15 +135,15 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
         const oldPaddleWidth = paddle.width;
         paddle.width +=15;
         setTimeout(() => paddle.width = oldPaddleWidth, 3000);
-
     }
 
     function ballHitBrick(ball, brick) {
         paddle.width < game.world.width/2 ? paddle.width +=5 : paddle.width;
         const killTween = game.add.tween(brick);
         killTween.to({y: 0}, 200, Phaser.Easing.Cubic.None);
-        killTween.onComplete.addOnce(() => killBrick(brick), this);
+        killTween.onComplete.addOnce(() => extraBrick(brick), this);
         killTween.start();
+        brick.kill();
         score += 10;
         scoreText.setText('💰 '+score);
         let countAlive = 0;
@@ -152,19 +152,14 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
                 countAlive++;
             }
         }
-        if (countAlive === 1) {
+        console.log('countAlive = ' + countAlive);
+        if (countAlive === 0) {
             pause();
             console.log('lvl = ' + lvl);
-            console.log(Object.keys(levels).length);
-            if (lvl === Object.keys(levels).length) {
-                textRenderer(game.world.width*0.5, game.world.height*0.3, 'You won the game, congratulations!', 'orange', [0.5, 1]);
-                restartBtn();
-            } else {
-                lvl +=1;
-                nextLvlText = textRenderer(game.world.width*0.5, game.world.height*0.3, 'You finish level, congratulations!', 'green', [0.5, 0]);
-                nextLvlBtn = game.add.button(game.world.width*0.5, game.world.height*0.5, 'button', nextLevel, this, 1, 0, 2);
-                nextLvlBtn.anchor.set(0.5);
-            }
+            lvl +=1;
+            nextLvlText = textRenderer(game.world.width*0.5, game.world.height*0.3, 'You finish level, congratulations!', 'green', [0.5, 0]);
+            nextLvlBtn = game.add.button(game.world.width*0.5, game.world.height*0.5, 'button', nextLevel, this, 1, 0, 2);
+            nextLvlBtn.anchor.set(0.5);
         }
     }
 
@@ -191,7 +186,7 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
             livesText.setText('❤ '+lives);
             lifeLostText.visible = true;
             resetDynamic();
-            game.input.onDown.addOnce(function(){
+            game.input.onDown.addOnce(() => {
                 lifeLostText.visible = false;
                 setVelocity(startVelocity*(`1.${lvl*2}`));
             }, this);
@@ -210,6 +205,7 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
     function startGame() {
         startBtn.destroy();
         initBricks();
+        console.log('in StartGame startVelocity*(`1.${lvl*2}` = ' + startVelocity*(`1.${lvl*2}`));
         setVelocity(startVelocity*(`1.${lvl*2}`));
         playing = true;
     }
@@ -220,6 +216,7 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
     }
 
     function setVelocity(num) {
+        console.log('seted ' + num);
         ball.body.velocity.set(num, -1*num);
         return;
     }
@@ -240,6 +237,32 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
         rect.ctx.fillStyle = color;
         rect.ctx.fill();
         return game.add.sprite(x, y, rect);
+    }
+
+    function getLevel() {
+        const forms = ['rect', 'circle'];
+        const width = Math.ceil(Math.random() * (50 - 15) + 15);
+        const height = Math.ceil(Math.random() * (30 - 20) + 20);
+        const row = Math.ceil(Math.random() * (5 - 1) + 1);
+        const col = Math.ceil(Math.random() * (7 - 3) + 3);
+
+        return {
+            "width": width,
+            "height": height,
+            "color": "green",
+            "type": forms[Math.round(Math.random())],
+            "count": {
+                "row": row,
+                "col": col
+            },
+            "offset": {
+                "top": Math.ceil(Math.random() * (80 - 40) + 40),
+                "left": Math.ceil(Math.random() * ((game.world.width/col) - 60) + 60)
+            },
+            "padding": 11,
+            "extra": Math.ceil(Math.random() * (row*col)),
+            "empty": row*col > 10 ? Math.ceil(Math.random() * (row*col)) : 0
+        };
     }
 
 const levels = {
