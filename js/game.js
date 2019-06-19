@@ -1,4 +1,4 @@
-const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
+const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
       preload: preload, create: create, update: update
     });
 
@@ -30,7 +30,7 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
     function create() {
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.physics.arcade.checkCollision.down = false;
-        ball = getCircle(game.world.width*0.5, game.world.height-25, 5, 'red');
+        ball = getCircle(game.world.width*0.5, game.world.height-65, 5, 'red');
 
         ball.anchor.set(0.5);
         game.physics.enable(ball, Phaser.Physics.ARCADE);
@@ -39,7 +39,7 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
         ball.checkWorldBounds = true;
         ball.events.onOutOfBounds.add(ballLeaveScreen, this);
 
-        paddle = getRect(game.world.width*0.5, game.world.height-5, 50, 5, 'black');
+        paddle = getRect(game.world.width*0.5, game.world.height-45, 60, 7, 'black');
         paddle.anchor.set(0.5,1);
         game.physics.enable(paddle, Phaser.Physics.ARCADE);
         paddle.body.immovable = true;
@@ -132,9 +132,8 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
         catchExtra.to({x: game.world.width*0.5, y: game.world.height}, 30, Phaser.Easing.Linear.None);
         catchExtra.onComplete.addOnce(() => extra.kill(), this);
         catchExtra.start();
-        const oldPaddleWidth = paddle.width;
-        paddle.width +=15;
-        setTimeout(() => paddle.width = oldPaddleWidth, 3000);
+        paddle.width +=10;
+        setTimeout(() => paddle.width -=10, 3000);
     }
 
     function ballHitBrick(ball, brick) {
@@ -176,14 +175,14 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
     }
 
     function resetDynamic() {
-        ball.reset(game.world.width*0.5, game.world.height-25);
-        paddle.reset(game.world.width*0.5, game.world.height-5);
+        ball.reset(game.world.width*0.5, game.world.height-65);
+        paddle.reset(game.world.width*0.5, game.world.height-45);
     }
 
     function ballLeaveScreen() {
         lives--;
+        livesText.setText('❤ '+lives);
         if(lives) {
-            livesText.setText('❤ '+lives);
             lifeLostText.visible = true;
             resetDynamic();
             game.input.onDown.addOnce(() => {
@@ -244,7 +243,7 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
         const width = Math.ceil(Math.random() * (50 - 15) + 15);
         const height = Math.ceil(Math.random() * (30 - 20) + 20);
         const row = Math.ceil(Math.random() * (5 - 1) + 1);
-        const col = Math.ceil(Math.random() * (7 - 3) + 3);
+        const col = Math.ceil(Math.random() * (12 - 3) + 3);
 
         return {
             "width": width,
@@ -264,57 +263,3 @@ const game = new Phaser.Game(480, 320, Phaser.CANVAS, null, {
             "empty": row*col > 10 ? Math.ceil(Math.random() * (row*col)) : 0
         };
     }
-
-const levels = {
-    "level_1": {
-        "width": 50,
-        "height": 20,
-        "color": "green",
-        "type": "rect",
-        "count": {
-            "row": 3,
-            "col": 7
-        },
-        "offset": {
-            "top": 40,
-            "left": 60
-        },
-        "padding": 11,
-        "extra": 6,
-        "empty": 4
-    },
-    "level_2": {
-        "width": 35,
-        "height": 40,
-        "color": "yellow",
-        "type": "circle",
-        "count": {
-            "row": 4,
-            "col": 9
-        },
-        "offset": {
-            "top": 45,
-            "left": 80
-        },
-        "padding": 5,
-        "extra": 6,
-        "empty": 12
-    },
-    "level_3": {
-        "width": 15,
-        "height": 15,
-        "color": "gray",
-        "type": "rect",
-        "count": {
-            "row": 5,
-            "col": 8
-        },
-        "offset": {
-            "top": 45,
-            "left": 80
-        },
-        "padding": 35,
-        "empty": 7,
-        "extra": 10
-    }
-};
