@@ -1,0 +1,32 @@
+{
+    "level_1": {
+        "width": 50,
+        "height": 20,
+        "color": "green",
+        "type": "rect",
+        "count": {
+            "row": 3,
+            "col": 7
+        },
+        "offset": {
+            "top": 40,
+            "left": 60
+        },
+        "padding": 11
+    },
+    "level_2": {
+        "width": 40,
+        "height": 40,
+        "color": "gray",
+        "type": "rect",
+        "count": {
+            "row": 4,
+            "col": 6
+        },
+        "offset": {
+            "top": 40,
+            "left": 80
+        },
+        "padding": 5
+    }
+}
