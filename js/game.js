@@ -1,4 +1,4 @@
-const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
+const game = new Phaser.Game("100%", "100%", Phaser.CANVAS, null, {
       preload: preload, create: create, update: update
     });
 
@@ -20,7 +20,7 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
     const startVelocity = 130;
 
     function preload() {
-        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
         game.scale.pageAlignHorizontally = true;
         game.scale.pageAlignVertically = true;
         game.stage.backgroundColor = '#eee';
@@ -30,7 +30,7 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
     function create() {
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.physics.arcade.checkCollision.down = false;
-        ball = getCircle(game.world.width*0.5, game.world.height-65, 5, 'red');
+        ball = getCircle(game.world.width*0.5, game.world.height*0.9, game.world.height*0.015, 'red');
 
         ball.anchor.set(0.5);
         game.physics.enable(ball, Phaser.Physics.ARCADE);
@@ -62,7 +62,7 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
     }
 
     function textRenderer(x, y, text, color, anchor) {
-        const textStyle = { font: '18px Arial', fill: color };
+        const textStyle = { font: `${game.world.height*0.05}px Arial`, fill: color };
         const result = game.add.text(x, y, text, textStyle);
         if (anchor) {
             result.anchor.set(anchor[0], anchor[1]);
@@ -71,7 +71,6 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
     }
 
     function initBricks() {
-        // brickInfo = levels[`level_${lvl}`];
         brickInfo = getLevel();
         bricks = game.add.group();
         let usedExtra = 0;
@@ -91,7 +90,7 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
                     }
                     var brickX = (c*xPlace)+brickInfo.offset.left;
                     var brickY = (r*(brickInfo.height+brickInfo.padding))+brickInfo.offset.top;
-    
+    //рассчитывать с учетом количества строк, чтобы позиционировать по центру
                     const useExtra = Math.round(Math.random());
                     let color = brickInfo.color;
                     if (useExtra && usedExtra < brickInfo.extra) {
@@ -103,7 +102,7 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
                             newBrick = getRect(brickX, brickY, brickInfo.width, brickInfo.height, color, useExtra);                
                             break;
                         case 'circle':
-                            newBrick = getCircle(brickX, brickY, brickInfo.width/2, color);
+                            newBrick = getCircle(brickX, brickY, brickInfo.height/2, color);
                             break;
                         default:
                             break;
@@ -120,7 +119,7 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
     function extraBrick(brick) {
         const getExtra = Math.round(Math.random()-0.15);
         if (getExtra) {
-            extra = getCircle(brick.x, brick.y, 3, 'orange');
+            extra = getCircle(brick.x, brick.y, game.world.height*0.02, 'orange');
             game.physics.enable(extra, Phaser.Physics.ARCADE);
             extra.body.gravity.y = 80;
         }
@@ -196,7 +195,6 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
     }
 
     function ballHitPaddle(ball, paddle) {
-        ball.animations.play('wobble');
         ball.body.velocity.x = -1*5*(paddle.x-ball.x);
         paddle.width > 20 ? paddle.width -=5 : paddle.width;
     }
@@ -240,10 +238,13 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
 
     function getLevel() {
         const forms = ['rect', 'circle'];
-        const width = Math.ceil(Math.random() * (50 - 15) + 15);
-        const height = Math.ceil(Math.random() * (30 - 20) + 20);
-        const row = Math.ceil(Math.random() * (5 - 1) + 1);
-        const col = Math.ceil(Math.random() * (12 - 3) + 3);
+        const width = Math.ceil(Math.random() * (game.world.width*0.07 - game.world.width*0.035) + game.world.width*0.035);
+        const height = Math.ceil(Math.random() * (game.world.height*0.06 - game.world.height*0.03) + game.world.height*0.03);
+        const padding = 11;
+        const left = game.world.width*0.07;
+        const top = game.world.height*0.09;
+        const row = Math.ceil(Math.random() * (game.world.height - top)/(height + padding + 3) - 1) || 3;
+        const col = ((game.world.width - left) / (width + padding) - 1) || 3;
 
         return {
             "width": width,
@@ -255,10 +256,10 @@ const game = new Phaser.Game(640, 360, Phaser.CANVAS, null, {
                 "col": col
             },
             "offset": {
-                "top": Math.ceil(Math.random() * (80 - 40) + 40),
-                "left": Math.ceil(Math.random() * ((game.world.width/col) - 60) + 60)
+                "top": top,
+                "left": left
             },
-            "padding": 11,
+            "padding": padding,
             "extra": Math.ceil(Math.random() * (row*col)),
             "empty": row*col > 10 ? Math.ceil(Math.random() * (row*col)) : 0
         };
