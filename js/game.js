@@ -17,7 +17,7 @@ const game = new Phaser.Game("100%", "100%", Phaser.CANVAS, null, {
     var playing = false;
     var startBtn;
     var nextLvlText;
-    const startVelocity = 130;
+    const startVelocity = (window.innerHeight + window.innerWidth)/6;
 
     function preload() {
         game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
@@ -28,9 +28,10 @@ const game = new Phaser.Game("100%", "100%", Phaser.CANVAS, null, {
     }
 
     function create() {
+        const paddleY = game.world.height-75;
         game.physics.startSystem(Phaser.Physics.ARCADE);
         game.physics.arcade.checkCollision.down = false;
-        ball = getCircle(game.world.width*0.5, game.world.height*0.9, game.world.height*0.015, 'red');
+        ball = getCircle(game.world.width*0.5, paddleY-15-game.world.height*0.02, game.world.height*0.02, 'red');
 
         ball.anchor.set(0.5);
         game.physics.enable(ball, Phaser.Physics.ARCADE);
@@ -39,7 +40,7 @@ const game = new Phaser.Game("100%", "100%", Phaser.CANVAS, null, {
         ball.checkWorldBounds = true;
         ball.events.onOutOfBounds.add(ballLeaveScreen, this);
 
-        paddle = getRect(game.world.width*0.5, game.world.height-45, 60, 7, 'black');
+        paddle = getRect(game.world.width*0.5, paddleY, 60, 7, 'black');
         paddle.anchor.set(0.5,1);
         game.physics.enable(paddle, Phaser.Physics.ARCADE);
         paddle.body.immovable = true;
@@ -174,8 +175,8 @@ const game = new Phaser.Game("100%", "100%", Phaser.CANVAS, null, {
     }
 
     function resetDynamic() {
-        ball.reset(game.world.width*0.5, game.world.height-65);
-        paddle.reset(game.world.width*0.5, game.world.height-45);
+        ball.reset(game.world.width*0.5, game.world.height-75-15-game.world.height*0.02);
+        paddle.reset(game.world.width*0.5, game.world.height-75);
     }
 
     function ballLeaveScreen() {
@@ -243,7 +244,7 @@ const game = new Phaser.Game("100%", "100%", Phaser.CANVAS, null, {
         const padding = 11;
         const left = game.world.width*0.07;
         const top = game.world.height*0.09;
-        const row = Math.ceil(Math.random() * (game.world.height - top)/(height + padding + 3) - 1) || 3;
+        const row = Math.ceil(Math.random() * (game.world.height - top - 75)/(height + padding + 3) - 1) || 3;
         const col = ((game.world.width - left) / (width + padding) - 1) || 3;
 
         return {
